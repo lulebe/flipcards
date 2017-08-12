@@ -1,7 +1,11 @@
 <template>
   <header class="topbar no-select">
-    <a :href="signedIn ? '#/home' : '#/'" class="topbar-title">
-      <img src="/static/img/icons/android-chrome-192x192.png" />
+    <a href="#" @click.prevent="goBack" class="topbar-title">
+      <img src="/static/img/icons/android-chrome-192x192.png" v-if="!canGoBack" />
+      <svg v-if="canGoBack" viewBox="0 0 24 24" style="width: 48px; height: 48px; padding: 12px;">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path fill="#FFFFFF" d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+      </svg>
       <span>Flipcards</span>
     </a>
     <div style="float: right;">
@@ -13,7 +17,7 @@
 <script>
   export default {
     props: [
-      'signedIn'
+      'signedIn', 'canGoBack'
     ],
     name: 'Topbar',
     data () {
@@ -23,6 +27,14 @@
     methods: {
       signout () {
         // TODO
+      },
+      goBack () {
+        if (this.canGoBack) {
+          console.log('here')
+          this.$emit('backPressed')
+        } else {
+          this.$router.push(this.signedIn ? '/home' : '/')
+        }
       }
     }
   }

@@ -1,15 +1,14 @@
 <template>
   <div>
-    <Topbar signedIn="true"></Topbar>
-    <a :href="'#/deck/' + deckId" class="back-link no-select">↶ back to Deck</a>
-    <button class="img button" @click="toggleEditing" style="float: right; margin: 16px 16px 0 0;">
-      <svg style="width:24px;height:24px" viewBox="0 0 24 24" v-if="!editing">
-        <path fill="#000000" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-      </svg>
-      <svg style="width:24px;height:24px" viewBox="0 0 24 24" v-if="editing">
-        <path fill="#33aa33" d="M15,9H5V5H15M12,19A3,3 0 0,1 9,16A3,3 0 0,1 12,13A3,3 0 0,1 15,16A3,3 0 0,1 12,19M17,3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V7L17,3Z" />
-      </svg>
-    </button>
+    <Topbar signedIn="true" canGoBack="true" @backPressed="$router.push('/deck/'+deckId)">
+      <button @click="toggleEditing" v-if="!editing" class="link">Edit</button>
+      <button @click="toggleEditing" v-if="editing" class="link">Save</button>
+    </Topbar>
+    <div class="color-picker">
+      <span class="color" style="background-color: green"></span>
+      <span class="color" style="background-color: red"></span>
+      <span class="color" style="background-color: blue"></span>
+    </div>
     <div class="markdown-link-container" v-if="editing">
       You can use
       <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown</a>
@@ -86,10 +85,26 @@
 </style>
 <style lang="css" scoped>
   .back-link {
-    display: inline-block;
+    display: block;
+    float: left;
     margin-top: 16px;
     margin-left: 16px;
     cursor: pointer;
+  }
+  .color-picker {
+    margin-top: 16px;
+    text-align: center;
+  }
+  .color {
+    margin: 0 4px;
+    display: inline-block;
+    border-radius: 0px;
+    height: 32px;
+    width: 32px;
+    transition: border-radius 0.2s ease;
+  }
+  .color:hover {
+    border-radius: 16px;
   }
   .heading {
     font-size: 1.5rem;

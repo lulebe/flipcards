@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Topbar signedIn="true">
+    <Topbar signedIn="true" canGoBack="true" @backPressed="$router.push('/home')">
       <button @click="addCard()" class="link">Add Card</button>
     </Topbar>
     <h1 class="no-select" style="margin: 24px;">{{deck.name}}</h1>
