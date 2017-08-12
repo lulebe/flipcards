@@ -8,8 +8,8 @@ import Frontpage from '@/components/Frontpage'
 import Signin from '@/components/Signin'
 import Signup from '@/components/Signup'
 import Home from '@/components/Home'
-// import Deck from '@/components/Deck'
-// import Card from '@/components/Card'
+import Deck from '@/components/Deck'
+import Card from '@/components/Card'
 
 Vue.use(Router)
 
@@ -38,8 +38,8 @@ const router = new Router({
       name: 'home',
       component: Home,
       meta: {needAuth: true}
-    } // ,
-    /* {
+    },
+    {
       path: '/deck/:deckId',
       name: 'deck',
       props: true,
@@ -52,7 +52,7 @@ const router = new Router({
       props: true,
       component: Card,
       meta: {needAuth: true}
-    } */
+    }
   ]
 })
 

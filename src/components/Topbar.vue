@@ -1,5 +1,5 @@
 <template>
-  <header class="topbar">
+  <header class="topbar no-select">
     <a :href="signedIn ? '#/home' : '#/'" class="topbar-title">
       <img src="/static/img/icons/android-chrome-192x192.png" />
       <span>Flipcards</span>

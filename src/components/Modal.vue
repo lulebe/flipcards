@@ -31,9 +31,10 @@
     z-index: 100;
   }
   .modal {
-    position: absolute;
-    width: 80%;
-    margin-left: 10%;
+    max-width: 500px;
+    width: 90%;
+    margin-left: auto;
+    margin-right: auto;
     margin-top: 80px;
     max-height: 60%;
     overflow-y: auto;

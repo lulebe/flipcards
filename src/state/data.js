@@ -15,7 +15,6 @@ export default {
   },
   mutations: {
     setDecks (state, decks) {
-      console.log(decks)
       Vue.set(state, 'decks', decks)
     },
     addDeck (state, {deck, key}) {
@@ -23,6 +22,19 @@ export default {
     },
     removeDeck (state, key) {
       Vue.delete(state.decks, key)
+    },
+    addCard (state, {deckId, key, card}) {
+      Vue.set(state.decks[deckId].cards, key, card)
+    },
+    removeCard (state, {deckId, cardId}) {
+      Vue.delete(state.decks[deckId].cards, cardId)
+    },
+    saveCard (state, {deckId, cardId, title, color, front, back}) {
+      const card = state.decks[deckId].cards[cardId]
+      card.title = title
+      card.color = color
+      card.front = front
+      card.back = back
     }
   },
   actions: {
@@ -44,11 +56,25 @@ export default {
     },
     createDeck ({dispatch, commit}, payload) {
       const deckId = generateUUID()
-      commit('addDeck', {deck: {'.key': deckId, name: payload.name, cards: {}}, key: deckId})
+      commit('addDeck', {deck: {'.key': deckId, name: payload.name, defaultColor: '#ffed96', cards: {}}, key: deckId})
       dispatch('saveToLS')
     },
     deleteDeck ({dispatch, commit}, deckId) {
       commit('removeDeck', deckId)
+      dispatch('saveToLS')
+    },
+    createCard ({dispatch, commit, state}, payload) {
+      const cardId = generateUUID()
+      const color = payload.color || state.decks[payload.deckId].defaultColor
+      commit('addCard', {card: {'.key': cardId, title: payload.title, color: color, front: '', back: ''}, key: cardId, deckId: payload.deckId})
+      dispatch('saveToLS')
+    },
+    deleteCard ({dispatch, commit}, {deckId, cardId}) {
+      commit('removeCard', {deckId, cardId})
+      dispatch('saveToLS')
+    },
+    saveCard ({dispatch, commit}, payload) {
+      commit('saveCard', payload)
       dispatch('saveToLS')
     }
   }

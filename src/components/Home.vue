@@ -3,7 +3,7 @@
     <Topbar signedIn="true">
       <button @click="createDeckModalOpen = true" class="link">New Deck</button>
     </Topbar>
-    <h1 style="margin: 24px;">Your Decks</h1>
+    <h1 class="no-select" style="margin: 24px;">Your Decks</h1>
     <ul class="decklist" v-if="decks.length > 0">
       <li class="deck" v-for="deck in decks">
         <button class="button img delbtn" @click="deleteDeck(deck)">
@@ -14,14 +14,15 @@
         <a :href="'#/deck/'+deck['.key']">{{deck.name}}</a>
       </li>
     </ul>
-    <div class="no-decks" v-if="decks.length === 0" unselectable="on">You have no decks yet. Click <small><strong>NEW DECK</strong></small> to create one.</div>
+    <div class="no-decks no-select" v-if="decks.length === 0" unselectable="on">You have no decks yet. Click <small><strong>NEW DECK</strong></small> to create one.</div>
     <Modal
       :open="createDeckModalOpen"
       title="Create a new Deck"
       cancelText="cancel"
       okText="create Deck"
       @ok="createDeck()"
-      @cancel="createDeckModalOpen = false">
+      @cancel="createDeckModalOpen = false"
+      class="no-select">
         <form @submit.prevent="createDeck()">
           <div class="input-group full-width">
             <label for="newdeckname">Deck Name</label>
@@ -95,11 +96,5 @@
     margin: 160px 24px 24px;
     text-align: center;
     color: #666;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    -o-user-select: none;
-    user-select: none;
-    cursor: default;
   }
 </style>

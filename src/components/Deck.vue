@@ -3,23 +3,23 @@
     <Topbar signedIn="true">
       <button @click="addCard()" class="link">Add Card</button>
     </Topbar>
-    <h1 style="margin: 24px;">{{deck.name}}</h1>
+    <h1 class="no-select" style="margin: 24px;">{{deck.name}}</h1>
     <section class="cardlist" v-if="cards.length > 0">
-      <a :href="'#/deck/' + deckId + '/' + card['.key']" class="card" v-for="card in cards" :style="{backgroundColor: card.color}">
-        <h2 class="title">{{card.title}}</h2>
-        <hr>
-        <a href="#" @click.prevent="deleteCard(card)" style="color: #aa3333; font-size: 0.7rem;">DELETE</a>
-      </a>
+      <transition-group name="card">
+        <a :href="'#/deck/' + deckId + '/' + card['.key']" class="card" v-for="card in cards" :key="card['.key']" :style="{backgroundColor: card.color}">
+          <h2 class="title">{{card.title}}</h2>
+          <hr>
+          <a href="#" @click.prevent="deleteCard(card)" style="color: #aa3333; font-size: 0.7rem;">DELETE</a>
+        </a>
+      </transition-group>
     </section>
-    <div class="no-cards" v-if="cards.length === 0">
+    <div class="no-cards no-select" v-if="cards.length === 0">
       You have no cards in this deck so far. Click <small><strong>ADD CARD</strong></small> to add the first one.
     </div>
   </div>
 </template>
 <script>
   import cTopbar from '@/components/Topbar'
-
-  import {firebaseDb, firebaseStatus, firebaseAuth} from '@/util/firebase'
 
   export default {
     components: {
@@ -28,30 +28,18 @@
     props: ['deckId'],
     data () {
       return {
-        deck: {name: 'Loading...'},
-        cards: []
       }
     },
-    mounted () {
-      if (firebaseStatus.user != null) {
-        this.loadDeck(firebaseStatus.user)
-      } else {
-        const unsub = firebaseAuth.onAuthStateChanged(user => {
-          unsub()
-          this.loadDeck(user)
-        })
-      }
+    computed: {
+      deck () { return this.$store.state.data.decks[this.deckId] },
+      cards () { return this.$store.getters['data/cardsOfDeck'](this.deckId) }
     },
     methods: {
-      loadDeck (user) {
-        this.$bindAsObject('deck', firebaseDb.ref('/users/' + user.uid + '/decks/' + this.deckId))
-        this.$bindAsArray('cards', firebaseDb.ref('/users/' + user.uid + '/decks/' + this.deckId + '/cards'))
-      },
       addCard () {
-        firebaseDb.ref('/users/' + firebaseStatus.user.uid + '/decks/' + this.deckId + '/cards').push({title: 'New Card', color: '#fff59d', front: '', back: ''})
+        this.$store.dispatch('data/createCard', {title: 'new Card', deckId: this.deckId})
       },
       deleteCard (card) {
-        firebaseDb.ref('/users/' + firebaseStatus.user.uid + '/decks/' + this.deckId + '/cards/' + card['.key']).remove()
+        this.$store.dispatch('data/deleteCard', {deckId: this.deckId, cardId: card['.key']})
       }
     }
   }
@@ -71,8 +59,9 @@
     margin: 8px;
     border-radius: 2px;
     box-shadow: 0 2px 3px rgba(0,0,0,0.4);
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
     cursor: pointer;
+    
   }
   .card:hover {
     box-shadow: 0 3px 8px rgba(0,0,0,0.3);
@@ -92,5 +81,19 @@
     font-size: 1rem;
     font-weight: 500;
     color: #111;
+  }
+
+  .card-leave-to {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  .card.card-enter {
+    transform: translateY(16px) scale(1.5);
+    box-shadow: 0 15px 50px rgba(0,0,0,0.4);
+    opacity: 0;
+  }
+  .card-enter-active, .card-leave-active {
+    transform-origin: 50% 50%;
+    transition: transform 0.2s ease, opacity 0.2s ease, box-shadow 0.2s ease;
   }
 </style>
