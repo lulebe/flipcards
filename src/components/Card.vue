@@ -127,5 +127,6 @@
     bottom: 16px;
     width: 100%;
     padding: 16px;
+    z-index: 3;
   }
 </style>
