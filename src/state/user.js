@@ -9,13 +9,30 @@ export default {
   state: {
     userId: null,
     user: null,
-    status: USER_STATES.NO_USER
+    status: USER_STATES.NO_USER,
+    fbConnected: false,
+    waitingToMakeOnline: false
   },
   mutations: {
     setUser (state, payload) {
       state.userId = payload.userId
       state.user = payload.user
-      state.status = payload.user.isLocal ? USER_STATES.SIGNED_IN : USER_STATES.NEEDS_SIGNIN
+      state.status = payload.status || (payload.user.isLocal ? USER_STATES.SIGNED_IN : USER_STATES.NEEDS_SIGNIN)
+    },
+    setStatus (state, status) {
+      state.status = status
+    },
+    signOut (state) {
+      state.userId = null
+      state.user = null
+      state.status = USER_STATES.NO_USER
+      state.waitingToMakeOnline = false
+    },
+    setFbConnected (state, connected) {
+      state.fbConnected = connected
+    },
+    setWaitingToMakeOnline (state, waiting) {
+      state.waitingToMakeOnline = waiting
     }
   },
   actions: {
@@ -27,7 +44,7 @@ export default {
       const acc = JSON.parse(lsAcc)
       commit('setUser', acc)
     },
-    loadOrCreateLocal ({commit, state}) {
+    loadOrCreateLocal ({commit, dispatch, state}) {
       const lsAcc = localStorage.getItem('userAccount')
       if (!lsAcc || !lsAcc.user.isLocal) {
         commit('setUser', {userId: 'local', user: {isLocal: true}})
@@ -36,12 +53,26 @@ export default {
         const acc = JSON.parse(lsAcc)
         commit('setUser', acc)
       }
+      dispatch('data/loadFromLS', null, {root: true})
     },
     saveToLS ({state}) {
       if (!state.user) {
         return
       }
       localStorage.setItem('userAccount', JSON.stringify({userId: state.userId, user: state.user}))
+    },
+    signOut ({state, commit, dispatch}) {
+      commit('signOut')
+      dispatch('data/signOut', null, {root: true})
+      localStorage.removeItem('userAccount')
+    },
+    firebaseAuthChanged ({commit, dispatch, state}, fbUser) {
+      if (fbUser === null && state.user && !state.user.isLocal) {
+        dispatch('signOut')
+      } else if (fbUser) {
+        commit('setUser', {userId: fbUser.uid, user: {isLocal: false}, status: USER_STATES.SIGNED_IN})
+        dispatch('data/loadFromLS', null, {root: true})
+      }
     }
   }
 }

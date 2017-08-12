@@ -10,11 +10,13 @@
     </a>
     <div style="float: right;">
       <slot></slot>
-      <button @click="signout()" class="link" v-if="signedIn">Sign Out</button>
+      <button @click="signOut" class="link" v-if="signedIn">Sign Out</button>
     </div>
   </header>
 </template>
 <script>
+  import {firebaseAuth} from '@/util/firebase'
+
   export default {
     props: [
       'signedIn', 'canGoBack'
@@ -25,12 +27,13 @@
       }
     },
     methods: {
-      signout () {
-        // TODO
+      signOut () {
+        firebaseAuth.signOut()
+        this.$store.dispatch('user/signOut')
+        this.$router.push('/')
       },
       goBack () {
         if (this.canGoBack) {
-          console.log('here')
           this.$emit('backPressed')
         } else {
           this.$router.push(this.signedIn ? '/home' : '/')

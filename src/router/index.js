@@ -8,6 +8,7 @@ import Frontpage from '@/components/Frontpage'
 import Signin from '@/components/Signin'
 import Signup from '@/components/Signup'
 import Home from '@/components/Home'
+import Settings from '@/components/Settings'
 import Deck from '@/components/Deck'
 import Card from '@/components/Card'
 
@@ -40,6 +41,12 @@ const router = new Router({
       meta: {needAuth: true}
     },
     {
+      path: '/settings',
+      name: 'settings',
+      component: Settings,
+      meta: {needAuth: true}
+    },
+    {
       path: '/deck/:deckId',
       name: 'deck',
       props: true,
@@ -65,5 +72,13 @@ router.beforeResolve((to, from, next) => {
     next('/home')
   } else {
     next()
+  }
+})
+
+store.watch(state => state.user.status, status => {
+  if (status === USER_STATES.SIGNED_IN && !router.currentRoute.meta.needAuth) {
+    router.replace('/home')
+  } else if (status !== USER_STATES.SIGNED_IN && router.currentRoute.meta.needAuth) {
+    router.replace('/')
   }
 })

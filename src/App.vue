@@ -67,6 +67,7 @@ export default {
     background: transparent;
     color: #999;
     border-color: #999;
+    pointer-events: none;
   }
   a {
     color: #00897b;
