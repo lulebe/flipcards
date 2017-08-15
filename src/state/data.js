@@ -9,9 +9,26 @@ export default {
   },
   getters: {
     decksAsArray (state) {
+      console.log(state)
       return Object.values(state.decks).sort((deckA, deckB) => (deckA.name > deckB.name) ? 1 : -1)
     },
-    cardsOfDeck: state => deckId => Object.values(state.decks[deckId].cards).sort((cardA, cardB) => (cardA.order > cardB.order) ? 1 : -1)
+    cardsOfDeck: state => deckId => Object.values(state.decks[deckId].cards).sort((cardA, cardB) => (cardA.order > cardB.order) ? 1 : -1),
+    navIds: (state, getters) => (deckId, cardId) => {
+      const ret = {prev: null, next: null}
+      let found = -2
+      getters.cardsOfDeck(deckId).some((card, index) => {
+        if (card['.key'] === cardId) {
+          found = index
+        } else if (found === (index - 1)) {
+          ret.next = card['.key']
+          return true
+        } else {
+          ret.prev = card['.key']
+        }
+        return false
+      })
+      return ret
+    }
   },
   mutations: {
     setDecks (state, decks) {

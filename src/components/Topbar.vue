@@ -10,7 +10,12 @@
     </a>
     <div style="float: right;">
       <slot></slot>
-      <button @click="signOut" class="link" v-if="signedIn">Sign Out</button>
+      <button @click="signOut" class="link" v-if="signedIn">
+      <svg viewBox="0 0 24 24" class="icon">
+        <path fill="#ffffff" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+      </svg>
+      <span class="text">Sign Out</span>
+      </button>
     </div>
   </header>
 </template>
@@ -60,7 +65,7 @@
     color: white;
     float: right;
   }
-  @media (max-width: 450px) {
+  @media (max-width: 480px) {
     .topbar .topbar-title > span {
       display: none;
     }
@@ -92,5 +97,22 @@
   .topbar .link:hover {
     background-color: rgba(0,0,0,0.2);
     text-decoration: none;
+  }
+  .topbar .link > .icon {
+    width: 24px;
+    height: 24px;
+    transform: translateY(6px);
+  }
+  @media (max-width: 610px) {
+    .topbar .link > .text {
+      display: block;
+      line-height: 40px;
+      font-size: 0.6rem;
+    }
+    .topbar .link > .icon {
+      display: block;
+      margin: 0 auto;
+      transform: translateY(12px);
+    }
   }
 </style>

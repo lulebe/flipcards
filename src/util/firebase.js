@@ -75,8 +75,11 @@ function syncAllDataDown (fbDecks) {
       for (let cardId in decks[deckId].cards) {
         decks[deckId].cards[cardId]['.key'] = cardId
       }
+      if (!decks[deckId].cards) {
+        decks[deckId].cards = {}
+      }
     }
-    store.dispatch('data/importDecks', decks)
+    store.dispatch('data/importDecks', decks || {})
   } catch (e) {}
 }
 

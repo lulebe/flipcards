@@ -1,7 +1,12 @@
 <template>
   <div>
     <Topbar signedIn="true" canGoBack="true" @backPressed="$router.push('/home')">
-      <button @click="addCard()" class="link">Add Card</button>
+      <button @click="addCard()" class="link">
+      <svg viewBox="0 0 24 24" class="icon">
+        <path fill="#ffffff" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+      </svg>
+      <span class="text">Add Card</span>
+      </button>
     </Topbar>
     <h1 class="no-select" style="margin: 24px;">{{deck.name}}</h1>
     <section class="cardlist" v-if="cards.length > 0">

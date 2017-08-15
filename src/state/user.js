@@ -71,6 +71,7 @@ export default {
         dispatch('signOut')
       } else if (fbUser) {
         commit('setUser', {userId: fbUser.uid, user: {isLocal: false}, status: USER_STATES.SIGNED_IN})
+        dispatch('saveToLS')
         dispatch('data/loadFromLS', null, {root: true})
       }
     }

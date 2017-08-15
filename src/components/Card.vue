@@ -1,8 +1,18 @@
 <template>
   <div>
     <Topbar signedIn="true" canGoBack="true" @backPressed="$router.push('/deck/'+deckId)">
-      <button @click="toggleEditing" v-if="!editing" class="link">Edit</button>
-      <button @click="toggleEditing" v-if="editing" class="link">Save</button>
+      <button @click="toggleEditing" v-if="!editing" class="link">
+        <svg viewBox="0 0 24 24" class="icon">
+          <path fill="#ffffff" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+      </svg>
+        <span class="text">Edit</span>
+      </button>
+      <button @click="toggleEditing" v-if="editing" class="link">
+        <svg viewBox="0 0 24 24" class="icon">
+            <path fill="#ffffff" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
+        </svg>
+        <span class="text">Save</span>
+      </button>
     </Topbar>
     <div class="color-picker">
       <span class="color" style="background-color: green"></span>
@@ -13,6 +23,10 @@
       You can use
       <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown</a>
       to style your text.
+    </div>
+    <div class="markdown-link-container" v-if="!editing">
+      <a :href="'#/deck/' + deckId + '/' + navIds.prev" v-if="navIds.prev">prev</a>
+      <a :href="'#/deck/' + deckId + '/' + navIds.next" v-if="navIds.next">next</a>
     </div>
     <Cardview :color="card.color" class="cardview">
       <h1 slot="header" v-if="!editing" class="heading">{{card.title}}</h1>
@@ -53,7 +67,8 @@
       }
     },
     computed: {
-      card () { return this.$store.state.data.decks[this.deckId].cards[this.cardId] }
+      card () { return this.$store.state.data.decks[this.deckId].cards[this.cardId] },
+      navIds () { return this.$store.getters['data/navIds'](this.deckId, this.cardId) }
     },
     methods: {
       toggleEditing () {
