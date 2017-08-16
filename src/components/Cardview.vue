@@ -63,6 +63,7 @@
     backface-visibility: hidden;
     width: 100%;
     margin: 0;
+    transition: background-color 0.3s ease;
   }
   .card.front {
     float: left;

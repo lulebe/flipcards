@@ -104,6 +104,9 @@
     transform: translateY(6px);
   }
   @media (max-width: 610px) {
+    .topbar {
+      box-shadow: 0 -5px 8px 5px rgba(0,0,0,0.7);
+    }
     .topbar .link > .text {
       display: block;
       line-height: 40px;

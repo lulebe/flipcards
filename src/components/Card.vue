@@ -14,21 +14,47 @@
         <span class="text">Save</span>
       </button>
     </Topbar>
-    <div class="color-picker">
-      <span class="color" style="background-color: green"></span>
-      <span class="color" style="background-color: red"></span>
-      <span class="color" style="background-color: blue"></span>
+    <div class="nav-btns" v-if="!editing">
+      <a :href="'#/deck/' + deckId + '/' + navIds.prev" v-if="navIds.prev" class="nav-btn prev">
+        <svg viewBox="0 0 24 24">
+            <path fill="#000000" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
+        </svg>
+      </a>
+      <span class="spacer"></span>
+      <a :href="'#/deck/' + deckId + '/' + navIds.next" v-if="navIds.next" class="nav-btn next">
+        <svg viewBox="0 0 24 24">
+            <path fill="#000000" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
+        </svg>
+      </a>
+    </div>
+    <div class="color-picker" v-if="editing">
+      <span class="color"
+        :class="{picked: eColor === '#ffed96'}"
+        @click="eColor = '#ffed96'"
+        style="background-color: #ffed96;">
+      </span>
+      <span class="color"
+        :class="{picked: eColor === '#adebad'}"
+        @click="eColor = '#adebad'"
+        style="background-color: #adebad;">
+      </span>
+      <span class="color"
+        :class="{picked: eColor === '#ffb399'}"
+        @click="eColor = '#ffb399'"
+        style="background-color: #ffb399;">
+      </span>
+      <span class="color"
+        :class="{picked: eColor === '#bfb3ff'}"
+        @click="eColor = '#bfb3ff'"
+        style="background-color: #bfb3ff;">
+      </span>
     </div>
     <div class="markdown-link-container" v-if="editing">
       You can use
       <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown</a>
       to style your text.
     </div>
-    <div class="markdown-link-container" v-if="!editing">
-      <a :href="'#/deck/' + deckId + '/' + navIds.prev" v-if="navIds.prev">prev</a>
-      <a :href="'#/deck/' + deckId + '/' + navIds.next" v-if="navIds.next">next</a>
-    </div>
-    <Cardview :color="card.color" class="cardview">
+    <Cardview :color="cardcolor" class="cardview">
       <h1 slot="header" v-if="!editing" class="heading">{{card.title}}</h1>
       <div slot="header" v-if="editing" class="heading-input-container">
         <input type="text" v-model="eTitle" placeholder="Title" class="heading-input">
@@ -68,7 +94,8 @@
     },
     computed: {
       card () { return this.$store.state.data.decks[this.deckId].cards[this.cardId] },
-      navIds () { return this.$store.getters['data/navIds'](this.deckId, this.cardId) }
+      navIds () { return this.$store.getters['data/navIds'](this.deckId, this.cardId) },
+      cardcolor () { return this.editing ? this.eColor : this.card.color }
     },
     methods: {
       toggleEditing () {
@@ -106,6 +133,48 @@
     margin-left: 16px;
     cursor: pointer;
   }
+  .nav-btns {
+    margin-top: 16px;
+    text-align: center;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 1.2rem;
+    height: 36px;
+  }
+  .nav-btns .nav-btn {
+    display: inline-block;
+    border-radius: 24px;
+    height: 36px;
+    width: 36px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.2s cubic-bezier(0.550, 0.055, 0.675, 0.190);
+  }
+  .nav-btns .nav-btn > svg {
+    width: 36px;
+    height: 36px;
+    transition: transform 1s;
+  }
+  .nav-btns .nav-btn:hover {
+    background-color: rgba(0,0,0,0.2);
+  }
+  .nav-btns .nav-btn.prev:active {
+    transform: scaleX(1.4);
+    transform-origin: 100% 50%;
+  }
+  .nav-btns .nav-btn.prev:active > svg {
+    transform: translateX(-8px);
+  }
+  .nav-btns .nav-btn.next:active {
+    transform: scaleX(1.4);
+    transform-origin: 0% 50%;
+  }
+  .nav-btns .nav-btn.next:active > svg {
+    transform: translateX(8px);
+  }
+  .nav-btns .spacer {
+    display: inline-block;
+    width: 160px;
+  }
   .color-picker {
     margin-top: 16px;
     text-align: center;
@@ -119,7 +188,11 @@
     transition: border-radius 0.2s ease;
   }
   .color:hover {
+    border-radius: 8px;
+  }
+  .color.picked {
     border-radius: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
   .heading {
     font-size: 1.5rem;
