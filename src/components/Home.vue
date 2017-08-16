@@ -1,22 +1,8 @@
 <template>
-  <div>
-    <Topbar signedIn="true">
-      <button @click="createDeckModalOpen = true" class="link">
-        <svg viewBox="0 0 24 24" class="icon">
-          <path fill="#ffffff" d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
-        </svg>
-        <span class="text">New Deck</span>
-      </button>
-      <a href="#/settings" class="link">
-      <svg viewBox="0 0 24 24" class="icon">
-        <path fill="#ffffff" d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/>
-      </svg>
-      <span class="text">Settings</span>
-      </a>
-    </Topbar>
+  <div class="page">
     <div v-if="userIsLocal" class="user-local-container">
       <p>
-        <a href="#/settings">Create an online account</a> if you want to use your cards across multiple devices.
+        <router-link :to="{name: 'settings'}" class="link" v-ripple>Create an online account</router-link> if you want to use your cards across multiple devices.
       </p>
     </div>
     <h1 class="no-select" style="margin: 24px;">Your Decks</h1>
@@ -27,10 +13,15 @@
             <path fill="#880000" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
           </svg>
         </button>
-        <a :href="'#/deck/'+deck['.key']">{{deck.name}}<br><span class="card-count">{{deck.cardCount}} cards</span></a>
+        <router-link :to="{name: 'deck', params: {deckId: deck['.key']}}">
+          {{deck.name}}<br>
+          <span class="card-count">{{deck.cardCount}} cards</span>
+        </router-link>
       </li>
     </ul>
-    <div class="no-decks no-select" v-if="decks.length === 0" unselectable="on">You have no decks yet. Click <small><strong>NEW DECK</strong></small> to create one.</div>
+    <div class="no-decks no-select" v-if="decks.length === 0">
+      You have no decks yet. Click <small><strong>NEW DECK</strong></small> to create one.
+    </div>
     <Modal
       :open="createDeckModalOpen"
       title="Create a new Deck"
@@ -49,12 +40,18 @@
   </div>
 </template>
 <script>
-  import cTopbar from '@/components/Topbar'
   import cModal from '@/components/Modal'
+
+  import {bindToPage} from '@/util/topbarAdapter'
+
+  let topbarDispatcher = null
+  const TOPBAR_ITEMS = {
+    NEW_DECK: 0,
+    SETTINGS: 1
+  }
 
   export default {
     components: {
-      'Topbar': cTopbar,
       'Modal': cModal
     },
     data () {
@@ -72,7 +69,34 @@
         }))
       }
     },
+    mounted () {
+      topbarDispatcher = bindToPage({
+        buttonPressed: this.topbarBtnPressed
+      })
+      topbarDispatcher.setBackEnabled(false)
+      topbarDispatcher.setItems([
+        {
+          id: TOPBAR_ITEMS.NEW_DECK,
+          text: 'New Deck',
+          svgPath: 'M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z'
+        },
+        {
+          id: TOPBAR_ITEMS.SETTINGS,
+          text: 'Settings',
+          svgPath: 'M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z'
+        }
+      ])
+    },
     methods: {
+      topbarBtnPressed (id) {
+        switch (id) {
+          case TOPBAR_ITEMS.NEW_DECK:
+            this.createDeckModalOpen = true
+            break
+          case TOPBAR_ITEMS.SETTINGS:
+            this.$router.push({name: 'settings'})
+        }
+      },
       createDeck () {
         this.createDeckModalOpen = false
         this.$store.dispatch('data/createDeck', {name: this.newDeckName})

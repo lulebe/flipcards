@@ -1,6 +1,5 @@
 <template>
-  <div>
-    <Topbar signedIn="true"></Topbar>
+  <div class="page">
     <h1 class="no-select" style="margin: 24px;">Settings</h1>
     <div v-if="userIsLocal" class="settings-panel">
       <h2>Create online Account</h2>
@@ -31,21 +30,15 @@
           <div class="error">Passwords don't match.</div>
         </div>
         <button type="submit" class="button acc" style="width: 100%" :disabled="!passwordsMatch || !passwordPatternMatch">Sign up</button>
-        <br><br>
-        Have an account already? <a href="#/signin">Sign in</a>
       </form>
     </div>
   </div>
 </template>
 <script>
   import {signInWithGoogle, signUpWithEmail} from '@/util/firebase'
-
-  import cTopbar from './Topbar'
+  import {bindToPage} from '@/util/topbarAdapter'
 
   export default {
-    components: {
-      'Topbar': cTopbar
-    },
     data () {
       return {
         password: '',
@@ -58,7 +51,17 @@
       passwordsMatch () { return this.password === this.passwordRetype },
       passwordPatternMatch () { return this.password.length >= 6 }
     },
+    mounted () {
+      const tD = bindToPage({
+        backPressed: this.backPressed
+      })
+      tD.setItems([])
+      tD.setBackEnabled(true)
+    },
     methods: {
+      backPressed () {
+        this.$router.push({name: 'home'})
+      },
       signup () {
         if (!this.passwordsMatch || !this.passwordPatternMatch) {
           return

@@ -1,31 +1,17 @@
 <template>
-  <div>
-    <Topbar signedIn="true" canGoBack="true" @backPressed="$router.push('/deck/'+deckId)">
-      <button @click="toggleEditing" v-if="!editing" class="link">
-        <svg viewBox="0 0 24 24" class="icon">
-          <path fill="#ffffff" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
-      </svg>
-        <span class="text">Edit</span>
-      </button>
-      <button @click="toggleEditing" v-if="editing" class="link">
-        <svg viewBox="0 0 24 24" class="icon">
-            <path fill="#ffffff" d="M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z"/>
-        </svg>
-        <span class="text">Save</span>
-      </button>
-    </Topbar>
+  <div class="page">
     <div class="nav-btns" v-if="!editing">
-      <a :href="'#/deck/' + deckId + '/' + navIds.prev" v-if="navIds.prev" class="nav-btn prev">
+      <router-link :to="{name: 'card', params: {deckId: deckId, cardId: navIds.prev || '0'}}" :class="{visible: navIds.prev}" class="nav-btn prev">
         <svg viewBox="0 0 24 24">
             <path fill="#000000" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
         </svg>
-      </a>
+      </router-link>
       <span class="spacer"></span>
-      <a :href="'#/deck/' + deckId + '/' + navIds.next" v-if="navIds.next" class="nav-btn next">
+      <router-link :to="{name: 'card', params: {deckId: deckId, cardId: navIds.next || '0'}}" :class="{visible: navIds.next}" class="nav-btn next">
         <svg viewBox="0 0 24 24">
             <path fill="#000000" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
         </svg>
-      </a>
+      </router-link>
     </div>
     <div class="color-picker" v-if="editing">
       <span class="color"
@@ -73,13 +59,20 @@
 <script>
   import VueMarkdown from 'vue-markdown'
 
-  import cTopbar from '@/components/Topbar'
   import cCardview from '@/components/Cardview'
+
+  import keyEvents from '@/util/keyEvents'
+  import {bindToPage} from '@/util/topbarAdapter'
+
+  let topbarDispatcher = null
+  const TOPBAR_ITEMS = {
+    EDIT: 0,
+    SAVE: 1
+  }
 
   export default {
     props: ['deckId', 'cardId'],
     components: {
-      'Topbar': cTopbar,
       'Cardview': cCardview,
       'Markdown': VueMarkdown
     },
@@ -97,7 +90,48 @@
       navIds () { return this.$store.getters['data/navIds'](this.deckId, this.cardId) },
       cardcolor () { return this.editing ? this.eColor : this.card.color }
     },
+    mounted () {
+      keyEvents.$on('save', () => this.editing && this.toggleEditing())
+      keyEvents.$on('prev', () => this.navIds.prev && this.$router.push({name: 'card', params: {deckId: this.deckId, cardId: this.navIds.prev}}))
+      keyEvents.$on('next', () => this.navIds.next && this.$router.push({name: 'card', params: {deckId: this.deckId, cardId: this.navIds.next}}))
+      topbarDispatcher = bindToPage({
+        backPressed: this.backPressed,
+        buttonPressed: this.topbarBtnPressed
+      })
+      topbarDispatcher.setBackEnabled(true)
+      this.topbarDisplayEdit()
+    },
     methods: {
+      backPressed () {
+        this.$router.push({name: 'deck', params: {deckId: this.deckId}})
+      },
+      topbarBtnPressed (id) {
+        switch (id) {
+          case TOPBAR_ITEMS.EDIT:
+            this.toggleEditing()
+            break
+          case TOPBAR_ITEMS.SAVE:
+            this.toggleEditing()
+        }
+      },
+      topbarDisplayEdit () {
+        topbarDispatcher.setItems([
+          {
+            id: TOPBAR_ITEMS.EDIT,
+            text: 'Edit',
+            svgPath: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'
+          }
+        ])
+      },
+      topbarDisplaySave () {
+        topbarDispatcher.setItems([
+          {
+            id: TOPBAR_ITEMS.SAVE,
+            text: 'Save',
+            svgPath: 'M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z'
+          }
+        ])
+      },
       toggleEditing () {
         if (!this.editing) {
           this.eTitle = this.card.title
@@ -105,6 +139,7 @@
           this.eFront = this.card.front
           this.eBack = this.card.back
           this.editing = true
+          this.topbarDisplaySave()
         } else {
           this.$store.dispatch('data/saveCard', {
             cardId: this.cardId,
@@ -115,6 +150,7 @@
             back: this.eBack
           })
           this.editing = false
+          this.topbarDisplayEdit()
         }
       }
     }
@@ -147,7 +183,13 @@
     height: 36px;
     width: 36px;
     cursor: pointer;
+    pointer-events: none;
+    opacity: 0;
     transition: background-color 0.2s, transform 0.2s cubic-bezier(0.550, 0.055, 0.675, 0.190);
+  }
+  .nav-btns .nav-btn.visible {
+    pointer-events: initial;
+    opacity: 1;
   }
   .nav-btns .nav-btn > svg {
     width: 36px;

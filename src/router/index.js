@@ -7,6 +7,8 @@ import {USER_STATES} from '@/state/user'
 import Frontpage from '@/components/Frontpage'
 import Signin from '@/components/Signin'
 import Signup from '@/components/Signup'
+
+import Shell from '@/components/Shell'
 import Home from '@/components/Home'
 import Settings from '@/components/Settings'
 import Deck from '@/components/Deck'
@@ -35,30 +37,38 @@ const router = new Router({
       meta: {needAuth: false}
     },
     {
-      path: '/home',
-      name: 'home',
-      component: Home,
-      meta: {needAuth: true}
-    },
-    {
-      path: '/settings',
-      name: 'settings',
-      component: Settings,
-      meta: {needAuth: true}
-    },
-    {
-      path: '/deck/:deckId',
-      name: 'deck',
-      props: true,
-      component: Deck,
-      meta: {needAuth: true}
-    },
-    {
-      path: '/deck/:deckId/:cardId',
-      name: 'card',
-      props: true,
-      component: Card,
-      meta: {needAuth: true}
+      path: '/app',
+      name: 'app',
+      component: Shell,
+      meta: {needAuth: true},
+      children: [
+        {
+          path: 'home',
+          name: 'home',
+          component: Home,
+          meta: {needAuth: true}
+        },
+        {
+          path: 'settings',
+          name: 'settings',
+          component: Settings,
+          meta: {needAuth: true}
+        },
+        {
+          path: 'deck/:deckId',
+          name: 'deck',
+          props: true,
+          component: Deck,
+          meta: {needAuth: true}
+        },
+        {
+          path: 'deck/:deckId/:cardId',
+          name: 'card',
+          props: true,
+          component: Card,
+          meta: {needAuth: true}
+        }
+      ]
     }
   ]
 })
@@ -69,7 +79,7 @@ router.beforeResolve((to, from, next) => {
   if (to.meta.needAuth && store.state.user.status !== USER_STATES.SIGNED_IN) {
     next('/')
   } else if (!to.meta.needAuth && store.state.user.status === USER_STATES.SIGNED_IN) {
-    next('/home')
+    next({name: 'home'})
   } else {
     next()
   }
@@ -77,7 +87,7 @@ router.beforeResolve((to, from, next) => {
 
 store.watch(state => state.user.status, status => {
   if (status === USER_STATES.SIGNED_IN && !router.currentRoute.meta.needAuth) {
-    router.replace('/home')
+    router.replace({name: 'home'})
   } else if (status !== USER_STATES.SIGNED_IN && router.currentRoute.meta.needAuth) {
     router.replace('/')
   }

@@ -9,29 +9,54 @@
       <span>Flipcards</span>
     </a>
     <div style="float: right;">
-      <slot></slot>
-      <button @click="signOut" class="link" v-if="signedIn">
-      <svg viewBox="0 0 24 24" class="icon">
-        <path fill="#ffffff" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
-      </svg>
-      <span class="text">Sign Out</span>
+      <button v-for="item in items" @click="itemClicked(item.id)" class="link">
+        <svg viewBox="0 0 24 24" class="icon">
+          <path fill="#ffffff" :d="item.svgPath"/>
+        </svg>
+        <span class="text">{{item.text}}</span>
+      </button>
+      <button @click="signOut" class="link">
+        <svg viewBox="0 0 24 24" class="icon">
+          <path fill="#ffffff" d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+        </svg>
+        <span class="text">Sign Out</span>
       </button>
     </div>
   </header>
 </template>
 <script>
   import {firebaseAuth} from '@/util/firebase'
+  import {bindToTopbar} from '@/util/topbarAdapter'
+
+  let adapterDispatcher = null
 
   export default {
-    props: [
-      'signedIn', 'canGoBack'
-    ],
     name: 'Topbar',
     data () {
       return {
+        canGoBack: false,
+        items: []
       }
     },
+    created () {
+      adapterDispatcher = bindToTopbar({
+        items: this.onItemsChanged,
+        backEnabled: this.onBackEnabled
+      })
+    },
+    destroyed () {
+      adapterDispatcher.unbind()
+    },
     methods: {
+      onItemsChanged (items) {
+        this.items = items
+      },
+      onBackEnabled (enabled) {
+        this.canGoBack = enabled
+      },
+      itemClicked (id) {
+        adapterDispatcher.buttonPressed(id)
+      },
       signOut () {
         firebaseAuth.signOut()
         this.$store.dispatch('user/signOut')
@@ -39,9 +64,9 @@
       },
       goBack () {
         if (this.canGoBack) {
-          this.$emit('backPressed')
+          adapterDispatcher.backPressed()
         } else {
-          this.$router.push(this.signedIn ? '/home' : '/')
+          this.$router.push({name: this.signedIn ? 'home' : 'Frontpage'})
         }
       }
     }
@@ -65,7 +90,17 @@
     color: white;
     float: right;
   }
+  @media (max-width: 610px) {
+    .topbar .topbar-title > span {
+      font-size: 1.5rem;
+    }
+  }
   @media (max-width: 480px) {
+    .topbar .topbar-title > span {
+      font-size: 1rem;
+    }
+  }
+  @media (max-width: 400px) {
     .topbar .topbar-title > span {
       display: none;
     }
@@ -78,10 +113,6 @@
   .topbar .topbar-title:hover {
     background-color: rgba(0,0,0,0.2);
     text-decoration: none;
-  }
-  .topbar > h1 {
-    margin: 0;
-    display: inline-block;
   }
   .topbar .link {
     color: white;

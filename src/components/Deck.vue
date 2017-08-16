@@ -1,21 +1,13 @@
 <template>
-  <div>
-    <Topbar signedIn="true" canGoBack="true" @backPressed="$router.push('/home')">
-      <button @click="addCard()" class="link">
-      <svg viewBox="0 0 24 24" class="icon">
-        <path fill="#ffffff" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-      </svg>
-      <span class="text">Add Card</span>
-      </button>
-    </Topbar>
+  <div class="page">
     <h1 class="no-select" style="margin: 24px;">{{deck.name}}</h1>
     <section class="cardlist" v-if="cards.length > 0">
       <transition-group name="card">
-        <a :href="'#/deck/' + deckId + '/' + card['.key']" class="card" v-for="card in cards" :key="card['.key']" :style="{backgroundColor: card.color}">
+        <router-link :to="{name: 'card', params: {deckId: deckId, cardId: card['.key']}}" class="card" v-for="card in cards" :key="card['.key']" :style="{backgroundColor: card.color}">
           <h2 class="title">{{card.title}}</h2>
           <hr>
           <a href="#" @click.prevent="deleteCard(card)" style="color: #aa3333; font-size: 0.7rem;">DELETE</a>
-        </a>
+        </router-link>
       </transition-group>
     </section>
     <div class="no-cards no-select" v-if="cards.length === 0">
@@ -24,12 +16,14 @@
   </div>
 </template>
 <script>
-  import cTopbar from '@/components/Topbar'
+  import {bindToPage} from '@/util/topbarAdapter'
+
+  let topbarDispatcher = null
+  const TOPBAR_ITEMS = {
+    ADD_CARD: 0
+  }
 
   export default {
-    components: {
-      'Topbar': cTopbar
-    },
     props: ['deckId'],
     data () {
       return {
@@ -39,7 +33,30 @@
       deck () { return this.$store.state.data.decks[this.deckId] },
       cards () { return this.$store.getters['data/cardsOfDeck'](this.deckId) }
     },
+    mounted () {
+      topbarDispatcher = bindToPage({
+        backPressed: this.backPressed,
+        buttonPressed: this.topbarBtnPressed
+      })
+      topbarDispatcher.setBackEnabled(true)
+      topbarDispatcher.setItems([
+        {
+          id: TOPBAR_ITEMS.ADD_CARD,
+          text: 'Add Card',
+          svgPath: 'M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z'
+        }
+      ])
+    },
     methods: {
+      backPressed () {
+        this.$router.push({name: 'home'})
+      },
+      topbarBtnPressed (id) {
+        switch (id) {
+          case TOPBAR_ITEMS.ADD_CARD:
+            this.addCard()
+        }
+      },
       addCard () {
         this.$store.dispatch('data/createCard', {title: 'new Card', deckId: this.deckId})
       },

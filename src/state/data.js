@@ -8,10 +8,7 @@ export default {
     decks: {}
   },
   getters: {
-    decksAsArray (state) {
-      console.log(state)
-      return Object.values(state.decks).sort((deckA, deckB) => (deckA.name > deckB.name) ? 1 : -1)
-    },
+    decksAsArray (state) { return Object.values(state.decks).sort((deckA, deckB) => (deckA.name > deckB.name) ? 1 : -1) },
     cardsOfDeck: state => deckId => Object.values(state.decks[deckId].cards).sort((cardA, cardB) => (cardA.order > cardB.order) ? 1 : -1),
     navIds: (state, getters) => (deckId, cardId) => {
       const ret = {prev: null, next: null}
