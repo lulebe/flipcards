@@ -25,7 +25,8 @@
         </div>
         <button type="submit" class="button acc" style="width: 100%" :disabled="!passwordsMatch || !passwordPatternMatch">Sign up</button>
         <br><br>
-        Have an account already? <a href="#/signin">Sign in</a>
+        Have an account already?
+        <router-link :to="{name: 'signin'}">Sign in</router-link>
       </form>
     </fieldset>
   </div>

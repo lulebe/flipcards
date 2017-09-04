@@ -4,6 +4,15 @@
   },
   "hosting": {
     "public": "dist",
-    "rewrites": []
+    "rewrites": [
+      {
+        "source": "*(!(*.png|*.ico|*.svg|*.js|*.css|*map))",
+        "destination": "/index.html"
+      },
+      {
+        "source": "**/*(!(*.png|*.ico|*.svg|*.js|*.css|*map))",
+        "destination": "/index.html"
+      }
+    ]
   }
 }

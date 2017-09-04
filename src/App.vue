@@ -7,13 +7,16 @@ export default {
 }
 </script>
 
-<style>
+<style lang="scss">
   * {
     box-sizing: border-box;
   }
   html, body {
     margin: 0;
     padding: 0;
+  }
+  body {
+    overflow-x: hidden;
   }
   html {
     font-family: sans-serif;
@@ -30,45 +33,46 @@ export default {
     padding: 8px 16px;
     cursor: pointer;
     background: #f3f3f3;
-  }
-  .button.img {
-    height: 32px;
-    width: 32px;
-    padding: 2px 0;
-  }
-  .button:active {
-    transform: scaleX(0.97);
-  }
+    &.img {
+      height: 32px;
+      width: 32px;
+      padding: 2px 0;
+    }
+    &:active {
+      transform: scaleX(1.04);
+    }
 
-  .button:hover {
-    background: #ddd;
+    &:hover {
+      background: #ddd;
+    }
+    &.prim {
+      color: #673ab7;
+      background-color: #f3f3f3;
+      border-color: #673ab7;
+      &:hover {
+        color: #f3f3f3;
+        background-color: #673ab7;
+        border-color: #f3f3f3;
+      }
+    }
+    &.acc {
+      color: #00897b;
+      background-color: #f3f3f3;
+      border-color: #00897b;
+      &:hover {
+        color: #f3f3f3;
+        background-color: #00897b;
+        border-color: #f3f3f3;
+      }
+    }
+    &[disabled] {
+      background: transparent;
+      color: #999;
+      border-color: #999;
+      pointer-events: none;
+    }
   }
-  .button.prim {
-    color: #673ab7;
-    background-color: #f3f3f3;
-    border-color: #673ab7;
-  }
-  .button.prim:hover {
-    color: #f3f3f3;
-    background-color: #673ab7;
-    border-color: #f3f3f3;
-  }
-  .button.acc {
-    color: #00897b;
-    background-color: #f3f3f3;
-    border-color: #00897b;
-  }
-  .button.acc:hover {
-    color: #f3f3f3;
-    background-color: #00897b;
-    border-color: #f3f3f3;
-  }
-  .button[disabled] {
-    background: transparent;
-    color: #999;
-    border-color: #999;
-    pointer-events: none;
-  }
+  
   a {
     color: #00897b;
     text-decoration: none;
@@ -82,6 +86,7 @@ export default {
     margin-bottom: 8px;
     outline: none;
     color: #333;
+    border-radius: 0px;
   }
   .input-group {
     display: inline-block;

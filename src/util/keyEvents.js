@@ -4,9 +4,17 @@ const keyEventHub = new Vue()
 
 export default keyEventHub
 
-window.addEventListener('keyup', event => {
-  if ((event.which === 115 && event.ctrlKey) || event.which === 19) {
+window.addEventListener('keydown', event => {
+  if ((event.which === 83 && (navigator.platform.match('Mac') ? event.metaKey : event.ctrlKey)) || event.which === 19) {
     keyEventHub.$emit('save')
+    event.preventDefault()
+    return false
+  } else if (event.which === 38 || event.which === 40) {
+    keyEventHub.$emit('flip')
+    event.preventDefault()
+    return false
+  } else if (event.which === 69 && (navigator.platform.match('Mac') ? event.metaKey : event.ctrlKey)) {
+    keyEventHub.$emit('edit')
     event.preventDefault()
     return false
   } else if (event.which === 37) {

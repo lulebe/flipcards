@@ -5,8 +5,8 @@
       <h1>Digital Index Cards</h1>
       <p>Study effectively with online Index Cards, synced in real time across all your devices.</p>
       <div class="ctas">
-        <a href="#/signup" class="button acc">Sign up</a>
-        <a href="#/signin" class="button prim">Sign in</a>
+        <router-link :to="{name: 'signup'}" class="button acc">Sign up</router-link>
+        <router-link :to="{name: 'signin'}" class="button prim">Sign in</router-link>
       </div>
       Or <a href="#" @click.prevent="signInLocally" class="local-link">sign In locally</a> and add synchronization later.
     </div>
@@ -14,7 +14,11 @@
 </template>
 
 <script>
+  import cTooltip from '@/components/Tooltip'
   export default {
+    components: {
+      Tooltip: cTooltip
+    },
     data () {
       return {
       }

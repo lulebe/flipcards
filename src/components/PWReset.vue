@@ -1,34 +1,31 @@
 <template>
   <div>
     <Topbar></Topbar>
-    <fieldset class="signin-form">
-      <legend>Sign in</legend>
-      <button class="google-btn" style="width: 100%;" @click="signinGoogle()">
-        <img src="/static/img/icons/google-g-logo.svg" class="idp-btn-img">
-        <div class="idp-btn-text">
-          sign in with google
-        </div>
-      </button>
-      <h4>or using your e-mail</h4>
-      <form @submit.prevent="signin">
+    <fieldset class="signin-form" v-if="!sent">
+      <legend>Password reset</legend>
+      <form @submit.prevent="resetpw">
         <label for="signin-email">E-Mail</label><br>
         <input type="email" v-model="email" class="full-width" id="signin-email" placeholder="tom@aol.com" required /><br>
-        <label for="signin-pw">Password</label><br>
-        <input type="password" v-model="password" class="full-width" id="signin-pw" placeholder="**************" required /><br>
-        <button type="submit" class="button acc" style="width: 100%">Sign in</button>
+        <button type="submit" class="button acc" style="width: 100%">Reset Password</button>
         <br><br>
-        Forgot your password?
-        <router-link :to="{name: 'pwreset'}">Reset Password</router-link>
+        Still remember your password?
+        <router-link :to="{name: 'signin'}">Sign in</router-link>
         <br><br>
         Have no account?
         <router-link :to="{name: 'signup'}">Sign up</router-link>
       </form>
     </fieldset>
+    <fieldset class="signin-form" v-if="sent">
+      <legend>Password reset</legend>
+      <p>
+        A password reset link has been sent to your E-Mail inbox.
+      </p>
+    </fieldset>
   </div>
 </template>
 
 <script>
-  import {signInWithGoogle, signInWithEmail} from '@/util/firebase'
+  import {sendPWResetEmail} from '@/util/firebase'
   
   import cTopbar from '@/components/Topbar'
 
@@ -38,16 +35,14 @@
     },
     data () {
       return {
-        password: '',
-        email: ''
+        email: '',
+        sent: false
       }
     },
     methods: {
-      signin () {
-        signInWithEmail(this.email, this.password)
-      },
-      signinGoogle () {
-        signInWithGoogle()
+      resetpw () {
+        sendPWResetEmail(this.email)
+        .then(() => { this.sent = true })
       }
     }
   }

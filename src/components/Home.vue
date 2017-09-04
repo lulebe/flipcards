@@ -8,7 +8,7 @@
     <h1 class="no-select" style="margin: 24px;">Your Decks</h1>
     <ul class="decklist" v-if="decks.length > 0">
       <li class="deck" v-for="deck in decks">
-        <button class="button img delbtn" @click="deleteDeck(deck)">
+        <button class="button img delbtn" @click="deleteDeck(deck)" aria-label="delete deck">
           <svg style="width:24px;height:24px" viewBox="0 0 24 24">
             <path fill="#880000" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
           </svg>
@@ -33,7 +33,7 @@
         <form @submit.prevent="createDeck()">
           <div class="input-group full-width">
             <label for="newdeckname">Deck Name</label>
-            <input type="text" v-model="newDeckName" class="full-width" id="newdeckname" placeholder="electrical engineering" required />
+            <input type="text" ref="nameInput" v-model="newDeckName" class="full-width" id="newdeckname" placeholder="electrical engineering" required />
           </div>
         </form>
     </Modal>
@@ -92,6 +92,7 @@
         switch (id) {
           case TOPBAR_ITEMS.NEW_DECK:
             this.createDeckModalOpen = true
+            setTimeout(() => this.$refs.nameInput && this.$refs.nameInput.focus(), 100)
             break
           case TOPBAR_ITEMS.SETTINGS:
             this.$router.push({name: 'settings'})

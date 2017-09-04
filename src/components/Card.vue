@@ -1,16 +1,18 @@
 <template>
   <div class="page">
     <div class="nav-btns" v-if="!editing">
-      <router-link :to="{name: 'card', params: {deckId: deckId, cardId: navIds.prev || '0'}}" :class="{visible: navIds.prev}" class="nav-btn prev">
+      <router-link :to="{name: 'card', params: {deckId: deckId, cardId: navIds.prev || '0'}, query: $route.query}" :class="{visible: navIds.prev}" class="nav-btn prev">
         <svg viewBox="0 0 24 24">
             <path fill="#000000" d="M15.41 7.41L14 6l-6 6 6 6 1.41-1.41L10.83 12z"/>
         </svg>
+        <Tooltip>or press ←</Tooltip>
       </router-link>
       <span class="spacer"></span>
-      <router-link :to="{name: 'card', params: {deckId: deckId, cardId: navIds.next || '0'}}" :class="{visible: navIds.next}" class="nav-btn next">
+      <router-link :to="{name: 'card', params: {deckId: deckId, cardId: navIds.next || '0'}, query: $route.query}" :class="{visible: navIds.next}" class="nav-btn next">
         <svg viewBox="0 0 24 24">
             <path fill="#000000" d="M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z"/>
         </svg>
+        <Tooltip>or press →</Tooltip>
       </router-link>
     </div>
     <div class="color-picker" v-if="editing">
@@ -40,15 +42,20 @@
       <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet" target="_blank">Markdown</a>
       to style your text.
     </div>
-    <Cardview :color="cardcolor" class="cardview">
+    <div style="text-align: center;">
+      <input type="checkbox" v-model="backDefault" id="backDefaultCb">
+      <label for="backDefaultCb">Show back first</label>
+    </div>
+    <Cardview :color="cardcolor" class="cardview" ref="card">
       <h1 slot="header" v-if="!editing" class="heading">{{card.title}}</h1>
       <div slot="header" v-if="editing" class="heading-input-container">
-        <input type="text" v-model="eTitle" placeholder="Title" class="heading-input">
+        <input type="text" ref="etitle" v-model="eTitle" placeholder="Title" class="heading-input">
       </div>
       <Markdown slot="frontContent" v-if="!editing" :source="card.front"></Markdown>
       <div slot="frontContent" v-if="editing" class="content-input-container">
         <textarea v-model="eFront" placeholder="Front Content" class="content-input"></textarea>
       </div>
+      <h2 slot="headerBack" class="heading">{{card.title}}</h2>
       <Markdown slot="backContent" v-if="!editing" :source="card.back"></Markdown>
       <div slot="backContent" v-if="editing" class="content-input-container">
         <textarea v-model="eBack" placeholder="Back Content" class="content-input"></textarea>
@@ -60,6 +67,7 @@
   import VueMarkdown from 'vue-markdown'
 
   import cCardview from '@/components/Cardview'
+  import cTooltip from '@/components/Tooltip'
 
   import keyEvents from '@/util/keyEvents'
   import {bindToPage} from '@/util/topbarAdapter'
@@ -74,7 +82,8 @@
     props: ['deckId', 'cardId'],
     components: {
       'Cardview': cCardview,
-      'Markdown': VueMarkdown
+      'Markdown': VueMarkdown,
+      'Tooltip': cTooltip
     },
     data () {
       return {
@@ -82,18 +91,22 @@
         eTitle: '',
         eColor: '',
         eFront: '',
-        eBack: ''
+        eBack: '',
+        backStack: 1,
+        backDefault: false
       }
     },
     computed: {
       card () { return this.$store.state.data.decks[this.deckId].cards[this.cardId] },
-      navIds () { return this.$store.getters['data/navIds'](this.deckId, this.cardId) },
+      navIds () { return this.$store.getters['data/navIds'](this.deckId, this.cardId, this.$route.query.shuffle) },
       cardcolor () { return this.editing ? this.eColor : this.card.color }
     },
     mounted () {
+      keyEvents.$on('flip', () => this.$refs.card && this.$refs.card.flip())
+      keyEvents.$on('edit', () => !this.editing && this.toggleEditing())
       keyEvents.$on('save', () => this.editing && this.toggleEditing())
-      keyEvents.$on('prev', () => this.navIds.prev && this.$router.push({name: 'card', params: {deckId: this.deckId, cardId: this.navIds.prev}}))
-      keyEvents.$on('next', () => this.navIds.next && this.$router.push({name: 'card', params: {deckId: this.deckId, cardId: this.navIds.next}}))
+      keyEvents.$on('prev', this.toPrev)
+      keyEvents.$on('next', this.toNext)
       topbarDispatcher = bindToPage({
         backPressed: this.backPressed,
         buttonPressed: this.topbarBtnPressed
@@ -101,9 +114,28 @@
       topbarDispatcher.setBackEnabled(true)
       this.topbarDisplayEdit()
     },
+    beforeDestroy () {
+      keyEvents.$off('flip')
+      keyEvents.$off('prev')
+      keyEvents.$off('next')
+      keyEvents.$off('save')
+      keyEvents.$off('edit')
+    },
+    watch: {
+      '$route' () {
+        this.backStack++
+      },
+      backDefault (newVal) {
+        this.$router.push({
+          name: this.$route.name,
+          params: this.$route.params,
+          query: {...this.$route.query, back: newVal}
+        })
+      }
+    },
     methods: {
       backPressed () {
-        this.$router.push({name: 'deck', params: {deckId: this.deckId}})
+        this.$router.go(-this.backStack)
       },
       topbarBtnPressed (id) {
         switch (id) {
@@ -119,6 +151,7 @@
           {
             id: TOPBAR_ITEMS.EDIT,
             text: 'Edit',
+            shortcut: 'CTRL-E',
             svgPath: 'M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z'
           }
         ])
@@ -128,9 +161,24 @@
           {
             id: TOPBAR_ITEMS.SAVE,
             text: 'Save',
+            shortcut: 'CTRL-S',
             svgPath: 'M17 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V7l-4-4zm-5 16c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3zm3-10H5V5h10v4z'
           }
         ])
+      },
+      toPrev () {
+        this.navIds.prev && this.$router.push({
+          name: 'card',
+          params: {deckId: this.deckId, cardId: this.navIds.prev},
+          query: this.$route.query
+        })
+      },
+      toNext () {
+        this.navIds.next && this.$router.push({
+          name: 'card',
+          params: {deckId: this.deckId, cardId: this.navIds.next},
+          query: this.$route.query
+        })
       },
       toggleEditing () {
         if (!this.editing) {
@@ -140,6 +188,7 @@
           this.eBack = this.card.back
           this.editing = true
           this.topbarDisplaySave()
+          setTimeout(() => this.$refs.etitle.focus(), 100)
         } else {
           this.$store.dispatch('data/saveCard', {
             cardId: this.cardId,
@@ -236,8 +285,12 @@
     border-radius: 16px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.5);
   }
-  .heading {
+  h1.heading {
     font-size: 1.5rem;
+    margin: 16px;
+  }
+  h2.heading {
+    font-size: 1rem;
     margin: 16px;
   }
   .heading-input-container {

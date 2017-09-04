@@ -10,6 +10,7 @@
         </div>
         <div class="flipper no-select" @click="viewBack = !viewBack">
           <div class="in-flipper">Click / Tap to flip!</div>
+          <Tooltip>↑ or ↓</Tooltip>
         </div>
       </div>
     </section>
@@ -17,6 +18,8 @@
   <div class="card-wrapper" :class="{'visible': viewBack, 'invisible': !viewBack}">
     <section class="back card" :style="{backgroundColor: color}">
       <div class="back">
+        <slot name="headerBack"></slot>
+        <hr>
         <div class="content">
           <slot name="backContent"></slot>
         </div>
@@ -29,11 +32,36 @@
   </div>
 </template>
 <script>
+  import cTooltip from '@/components/Tooltip'
+
   export default {
+    components: {
+      Tooltip: cTooltip
+    },
     props: ['title', 'color', 'front', 'back'],
     data () {
       return {
         viewBack: false
+      }
+    },
+    methods: {
+      flip () {
+        this.viewBack = !this.viewBack
+      },
+      toBack () {
+        this.viewBack = true
+      },
+      toFront () {
+        this.viewBack = false
+      }
+    },
+    watch: {
+      '$route' (to, from) {
+        if (to.query.back) {
+          this.toBack()
+        } else {
+          this.toFront()
+        }
       }
     }
   }
@@ -87,7 +115,7 @@
     animation: flip-back-in 0.35s forwards;
     animation-timing-function: ease;
   }
-  .front > hr {
+  .front > hr, .back > hr {
     height: 1px;
     border: none;
     background-color: rgba(0,0,0,0.3);

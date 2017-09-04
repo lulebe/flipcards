@@ -5,22 +5,24 @@ import generateUUID from '@/util/IdGenerator'
 export default {
   namespaced: true,
   state: {
-    decks: {}
+    decks: {},
+    shuffledCardIds: {}
   },
   getters: {
     decksAsArray (state) { return Object.values(state.decks).sort((deckA, deckB) => (deckA.name > deckB.name) ? 1 : -1) },
     cardsOfDeck: state => deckId => Object.values(state.decks[deckId].cards).sort((cardA, cardB) => (cardA.order > cardB.order) ? 1 : -1),
-    navIds: (state, getters) => (deckId, cardId) => {
+    navIds: (state, getters) => (deckId, cardId, shuffle) => {
       const ret = {prev: null, next: null}
       let found = -2
-      getters.cardsOfDeck(deckId).some((card, index) => {
-        if (card['.key'] === cardId) {
+      const cardIdList = shuffle ? state.shuffledCardIds[deckId] : getters.cardsOfDeck(deckId).map(card => card['.key'])
+      cardIdList.some((card, index) => {
+        if (card === cardId) {
           found = index
         } else if (found === (index - 1)) {
-          ret.next = card['.key']
+          ret.next = card
           return true
         } else {
-          ret.prev = card['.key']
+          ret.prev = card
         }
         return false
       })
@@ -53,6 +55,18 @@ export default {
       card.color = color
       card.front = front
       card.back = back
+    },
+    shuffleDeck (state, deckId) {
+      const a = Object.values(state.decks[deckId].cards).map(card => {
+        return card['.key']
+      })
+      for (let i = a.length; i; i--) {
+        let j = Math.floor(Math.random() * i)
+        let x = a[i - 1]
+        a[i - 1] = a[j]
+        a[j] = x
+      }
+      state.shuffledCardIds[deckId] = a
     }
   },
   actions: {

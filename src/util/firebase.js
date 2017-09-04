@@ -31,6 +31,23 @@ export function signInWithEmail (email, password) {
   return firebaseAuth.signInWithEmailAndPassword(email, password)
 }
 
+export function sendPWResetEmail (email) {
+  return firebaseAuth.sendPasswordResetEmail(email)
+}
+
+export function isFirebaseEmailUser () {
+  // TODO implement
+  return false
+}
+
+export function fbDeleteAcc () {
+  if (!firebaseStatus.authed) {
+    return Promise.reject(new Error('Not authenticated to firebase'))
+  }
+  return firebaseDb.ref('/users/' + firebaseStatus.user.uid).remove()
+  .then(() => firebaseStatus.user.delete())
+}
+
 // firebase to vuex connection
 
 var deactivateDownSync = null

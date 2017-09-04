@@ -7,6 +7,7 @@ import {USER_STATES} from '@/state/user'
 import Frontpage from '@/components/Frontpage'
 import Signin from '@/components/Signin'
 import Signup from '@/components/Signup'
+import PWReset from '@/components/PWReset'
 
 import Shell from '@/components/Shell'
 import Home from '@/components/Home'
@@ -17,23 +18,30 @@ import Card from '@/components/Card'
 Vue.use(Router)
 
 const router = new Router({
+  mode: 'history',
   routes: [
     {
       path: '/',
-      name: 'Frontpage',
+      name: 'frontpage',
       component: Frontpage,
       meta: {needAuth: false, noAuthRedirect: true}
     },
     {
       path: '/signup',
-      name: 'Signup',
+      name: 'signup',
       component: Signup,
       meta: {needAuth: false}
     },
     {
       path: '/signin',
-      name: 'Signin',
+      name: 'signin',
       component: Signin,
+      meta: {needAuth: false}
+    },
+    {
+      path: '/pwreset',
+      name: 'pwreset',
+      component: PWReset,
       meta: {needAuth: false}
     },
     {
@@ -69,17 +77,26 @@ const router = new Router({
           meta: {needAuth: true}
         }
       ]
+    },
+    {
+      path: '*',
+      name: 'fallback',
+      component: Frontpage,
+      meta: {needAuth: false}
     }
   ]
 })
 
 export default router
 
+var originalRoute = null
+
 router.beforeResolve((to, from, next) => {
   if (to.meta.needAuth && store.state.user.status !== USER_STATES.SIGNED_IN) {
-    next('/')
+    originalRoute = {path: to.path}
+    next({name: 'frontpage'})
   } else if (!to.meta.needAuth && store.state.user.status === USER_STATES.SIGNED_IN) {
-    next({name: 'home'})
+    next(originalRoute || {name: 'home'})
   } else {
     next()
   }
@@ -87,8 +104,11 @@ router.beforeResolve((to, from, next) => {
 
 store.watch(state => state.user.status, status => {
   if (status === USER_STATES.SIGNED_IN && !router.currentRoute.meta.needAuth) {
-    router.replace({name: 'home'})
+    router.replace(originalRoute || {name: 'home'})
   } else if (status !== USER_STATES.SIGNED_IN && router.currentRoute.meta.needAuth) {
-    router.replace('/')
+    router.replace({name: 'frontpage'})
+  }
+  if (status !== USER_STATES.SIGNED_IN) {
+    originalRoute = null
   }
 })

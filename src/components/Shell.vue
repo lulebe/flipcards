@@ -57,5 +57,7 @@
     right: 0;
     background: white;
     min-height: calc(100vh - 64px);
+    max-width: 960px;
+    margin: 0 auto;
   }
 </style>

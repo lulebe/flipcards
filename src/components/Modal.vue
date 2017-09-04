@@ -1,14 +1,16 @@
 <template>
-  <div class="background-fill" @click="$emit('cancel')" v-if="open">
-    <div class="modal" @click.stop="">
-      <h3>{{title}}</h3>
-      <slot></slot>
-      <div class="buttons">
-        <button class="button" @click="$emit('cancel')">{{cancelText}}</button>
-        <button class="button acc" @click="$emit('ok')">{{okText}}</button>
+  <transition name="modal">
+    <div class="background-fill" @click="$emit('cancel')" v-if="open">
+      <div class="modal" @click.stop="">
+        <h3>{{title}}</h3>
+        <slot></slot>
+        <div class="buttons">
+          <button class="button" @click="$emit('cancel')">{{cancelText}}</button>
+          <button class="button acc" @click="$emit('ok')">{{okText}}</button>
+        </div>
       </div>
     </div>
-  </div>
+  </transition>
 </template>
 <script>
   export default {
@@ -52,5 +54,13 @@
   .buttons > button {
     margin-top: 8px;
     margin-left: 8px;
+  }
+  .modal-enter-active, .modal-leave-active {
+    transition: transform 0.3s, opacity 0.3s;
+    transform-origin: 50% 0%;
+  }
+  .modal-enter, .modal-leave-to {
+    transform: scale(1.3);
+    opacity: 0;
   }
 </style>
