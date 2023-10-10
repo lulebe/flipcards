@@ -2,6 +2,8 @@
 
 > PWA for studying with virtual index cards
 
+Build with NodeJs v6.
+
 ## Build Setup
 
 ``` bash

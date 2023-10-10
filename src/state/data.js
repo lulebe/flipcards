@@ -10,7 +10,7 @@ export default {
   },
   getters: {
     decksAsArray (state) { return Object.values(state.decks).sort((deckA, deckB) => (deckA.name > deckB.name) ? 1 : -1) },
-    cardsOfDeck: state => deckId => Object.values(state.decks[deckId].cards).sort((cardA, cardB) => (cardA.order > cardB.order) ? 1 : -1),
+    cardsOfDeck: state => deckId => Object.values(state.decks[deckId].cards).sort((cardA, cardB) => cardA.title.localeCompare(cardB.title)),
     navIds: (state, getters) => (deckId, cardId, shuffle) => {
       const ret = {prev: null, next: null}
       let found = -2

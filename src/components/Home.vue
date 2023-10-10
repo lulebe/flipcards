@@ -8,7 +8,7 @@
     <h1 class="no-select" style="margin: 24px;">Your Decks</h1>
     <ul class="decklist" v-if="decks.length > 0">
       <li class="deck" v-for="deck in decks">
-        <button class="button img delbtn" @click="deleteDeck(deck)" aria-label="delete deck">
+        <button class="button img delbtn" @click="openDeleteDeckModal(deck)" aria-label="delete deck">
           <svg style="width:24px;height:24px" viewBox="0 0 24 24">
             <path fill="#880000" d="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
           </svg>
@@ -37,6 +37,16 @@
           </div>
         </form>
     </Modal>
+    <Modal
+      :open="deleteDeckModalOpen"
+      title="Delete Deck"
+      cancelText="cancel"
+      okText="delete"
+      @ok="deleteDeck()"
+      @cancel="cancelDeleteDeck()"
+      class="no-select">
+        Really delete {{toBeDeletedName}}? This cannot be undone!
+    </Modal>
   </div>
 </template>
 <script>
@@ -57,6 +67,9 @@
     data () {
       return {
         createDeckModalOpen: false,
+        deleteDeckModalOpen: false,
+        toBeDeletedName: null,
+        toBeDeletedKey: null,
         newDeckName: ''
       }
     },
@@ -103,8 +116,19 @@
         this.$store.dispatch('data/createDeck', {name: this.newDeckName})
         this.newDeckName = ''
       },
-      deleteDeck (deck) {
-        this.$store.dispatch('data/deleteDeck', deck['.key'])
+      openDeleteDeckModal (deck) {
+        this.toBeDeletedName = deck.name
+        this.toBeDeletedKey = deck['.key']
+        this.deleteDeckModalOpen = true
+      },
+      deleteDeck () {
+        this.$store.dispatch('data/deleteDeck', this.toBeDeletedKey)
+        this.deleteDeckModalOpen = false
+      },
+      cancelDeleteDeck () {
+        this.deleteDeckModalOpen = false
+        this.toBeDeletedName = null
+        this.toBeDeletedKey = null
       }
     }
   }
